@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Experto: Digitalización y THD</title>
+    <style>
+        :root {
+            --bg-color: #0d1117;
+            --card-bg: #161b22;
+            --text-main: #c9d1d9;
+            --accent: #58a6ff;
+            --success: #238636;
+            --error: #da3633;
+            --border: #30363d;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .header-img {
+            width: 300px;
+            height: auto;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        #quiz-container {
+            max-width: 800px;
+            width: 100%;
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--accent);
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 10px;
+        }
+
+        .question-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .question-text {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        .options-grid {
+            display: grid;
+            gap: 10px;
+        }
+
+        .option-btn {
+            background-color: #21262d;
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            padding: 12px;
+            border-radius: 6px;
+            text-align: left;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .option-btn:hover:not(:disabled) {
+            background-color: #30363d;
+            border-color: #8b949e;
+        }
+
+        .option-btn.correct {
+            background-color: var(--success) !important;
+            border-color: var(--success);
+            color: white;
+        }
+
+        .option-btn.incorrect {
+            background-color: var(--error) !important;
+            border-color: var(--error);
+            color: white;
+        }
+
+        #submit-test {
+            background-color: var(--success);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 6px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        #results-screen {
+            display: none;
+            text-align: center;
+            animation: fadeIn 0.5s;
+        }
+
+        .result-circle {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            border: 10px solid;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin: 40px auto;
+        }
+
+        .quote {
+            font-style: italic;
+            margin-top: 20px;
+            color: var(--accent);
+            font-size: 1.2rem;
+        }
+
+        .hidden { display: none; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <img src="HACKCAT.JPG" alt="HackCat Logo" class="header-img">
+
+    <div id="quiz-container">
+        <h1>Examen de Certificación: Digitalización Industrial</h1>
+        <div id="questions-wrapper"></div>
+        <button id="submit-test">Finalizar Test</button>
+    </div>
+
+    <div id="results-screen">
+        <h2>Resultado del Análisis</h2>
+        <div id="score-circle" class="result-circle"></div>
+        <img src="HACKCAT.JPG" alt="HackCat Logo" class="header-img">
+        <p id="result-quote" class="quote"></p>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                q: "¿Cuál es el objetivo primordial de las Tecnologías de la Operación (TO)?",
+                options: ["Gestionar el flujo de datos abstractos y el software de negocio.", "Monitorizar y automatizar procesos físicos industriales.", "Centralizar el almacenamiento de información en la nube.", "Desarrollar plataformas SaaS para clientes finales."],
+                correct: 1
+            },
+            {
+                q: "En el modelo IaaS, ¿qué elemento es gestionado específicamente por el PROVEEDOR según la jerarquía técnica?",
+                options: ["Middleware y Datos.", "Sistema Operativo y Aplicaciones.", "Virtualización, Servidores y Red.", "Entorno de ejecución y Middleware."],
+                correct: 2
+            },
+            {
+                q: "Si hablamos de procesamiento de datos realizado directamente DENTRO del dispositivo, nos referimos a:",
+                options: ["Fog Computing.", "Edge Computing.", "Mist Computing.", "Cloud Computing."],
+                correct: 2
+            },
+            {
+                q: "Dentro de las 5 V del Big Data, ¿cuál define la fiabilidad y precisión de los datos recolectados?",
+                options: ["Valor.", "Veracidad.", "Variedad.", "Velocidad."],
+                correct: 1
+            },
+            {
+                q: "¿Qué diferencia técnica fundamental separa un 'Dato' de la 'Información'?",
+                options: ["El dato es analógico y la información es digital.", "La información es un hecho aislado y el dato es el procesamiento.", "La información es el dato procesado con significado.", "No hay diferencia, son términos intercambiables en Industria 4.0."],
+                correct: 2
+            },
+            {
+                q: "En el contexto de la digitalización, ¿cuál de estos se considera un 'Desafío' crítico?",
+                options: ["Sostenibilidad ambiental.", "Nuevos modelos de negocio.", "Brecha tecnológica.", "Eficiencia operativa."],
+                correct: 2
+            },
+            {
+                q: "¿Qué modelo de servicio en la nube ofrece una aplicación completa lista para usar como Gmail o Office 365?",
+                options: ["PaaS.", "IaaS.", "SaaS.", "Mist Computing."],
+                correct: 2
+            },
+            {
+                q: "La adquisición de la empresa Acens por parte de Telefónica tuvo como objetivo principal:",
+                options: ["Sustituir su red de fibra óptica.", "Impulsar servicios digitales empresariales a través de Cloud Computing.", "Desarrollar hardware para sensores industriales.", "Eliminar la competencia en el sector de la ciberseguridad."],
+                correct: 1
+            },
+            {
+                q: "Un contenedor en la nube se define técnicamente como:",
+                options: ["Un hardware físico de almacenamiento masivo.", "Paquetes que incluyen todo lo necesario para ejecutar una aplicación en cualquier entorno.", "Un sistema de refrigeración para servidores.", "Una base de datos SQL tradicional."],
+                correct: 1
+            },
+            {
+                q: "La Inteligencia Artificial 'Fuerte' se caracteriza por:",
+                options: ["Estar diseñada para tareas específicas como chatbots.", "Capacidad de razonar y aprender de manera autónoma (en investigación).", "Funcionar solo mediante procesamiento en la nube.", "Ser la base actual de los asistentes de voz comerciales."],
+                correct: 1
+            },
+            {
+                q: "¿Cuál es la primera fase en el ciclo de vida de los datos?",
+                options: ["Procesamiento y visualización.", "Archivado o eliminación.", "Captura (sensores, formularios, etc.).", "Almacenamiento en bases de datos."],
+                correct: 2
+            },
+            {
+                q: "En la Industria 4.0, ¿cómo se integra la TI con la TO?",
+                options: ["La TO reemplaza totalmente a la TI.", "Los datos de TO se envían a TI para análisis predictivo y ajuste autónomo.", "Funcionan de forma aislada para evitar riesgos de ciberseguridad.", "La TI gestiona los sensores y la TO gestiona el Big Data."],
+                correct: 1
+            },
+            {
+                q: "El Fog Computing se sitúa técnicamente en:",
+                options: ["El centro de datos principal.", "Nodos intermedios de la red.", "El núcleo del sensor de hardware.", "Dispositivos móviles de usuario final."],
+                correct: 1
+            },
+            {
+                q: "¿Qué beneficio de la digitalización está directamente relacionado con la optimización de recursos?",
+                options: ["Riesgos de ciberseguridad.", "Necesidad de formación digital.", "Eficiencia y reducción de costes.", "Dependencia tecnológica."],
+                correct: 2
+            },
+            {
+                q: "Azure App Services y Heroku son ejemplos representativos de:",
+                options: ["IaaS.", "PaaS.", "SaaS.", "On-Premises."],
+                correct: 1
+            },
+            {
+                q: "Según la clasificación de las THD, ¿cuál es la función de las Tecnologías de la Información?",
+                options: ["Actuar directamente sobre el hardware de producción.", "Almacenar, procesar y comunicar datos.", "Gestionar eventos físicos en planta.", "Monitorizar el desgaste de piezas mecánicas."],
+                correct: 1
+            },
+            {
+                q: "¿Qué 'V' del Big Data se refiere a la rapidez con la que se generan los datos?",
+                options: ["Volumen.", "Variedad.", "Velocidad.", "Valor."],
+                correct: 2
+            },
+            {
+                q: "¿Cuál es el último paso recomendado en el ciclo de vida de los datos?",
+                options: ["Uso operativo.", "Archivado o eliminación.", "Visualización en dashboards.", "Captura transaccional."],
+                correct: 1
+            },
+            {
+                q: "Los sistemas de control que actúan sobre la producción física pertenecen al ámbito de:",
+                options: ["TI (Information Technology).", "TO (Operation Technology).", "IA Débil.", "Sistemas SaaS."],
+                correct: 1
+            },
+            {
+                q: "¿Qué permite transformar el conocimiento en una organización?",
+                options: ["Recopilar datos aislados sin orden.", "Tomar decisiones informadas mediante análisis y contexto.", "Evitar la automatización de procesos.", "Reducir la variedad de datos recibidos."],
+                correct: 1
+            },
+            {
+                q: "Una ventaja crítica de los contenedores en la nube es:",
+                options: ["Aumentan la portabilidad y eficiencia del despliegue.", "Eliminan la necesidad de tener una conexión a Internet.", "Sustituyen a la Inteligencia Artificial.", "Reducen la velocidad de procesamiento de datos."],
+                correct: 0
+            },
+            {
+                q: "La 'Variedad' en Big Data hace referencia a:",
+                options: ["La cantidad total de Terabytes.", "Diferentes tipos y formatos como texto, imagen, vídeo y audio.", "La veracidad de la fuente de origen.", "La utilidad económica del dato."],
+                correct: 1
+            },
+            {
+                q: "¿Cuál de estos servicios NO es gestionado por el usuario en un modelo PaaS?",
+                options: ["Aplicaciones.", "Datos.", "Sistema Operativo.", "Ambos, Aplicaciones y Datos."],
+                correct: 2
+            },
+            {
+                q: "En una gestión de datos de un taller mecánico, la toma de decisiones se sitúa en la fase de:",
+                options: ["Captura.", "Almacenamiento.", "Uso operativo.", "Archivado."],
+                correct: 2
+            },
+            {
+                q: "¿Qué tecnología facilita la toma de decisiones basadas en datos reales en el ámbito TI?",
+                options: ["Robots inteligentes.", "Big Data y Cloud Computing.", "Sistemas de control de hardware.", "Sensores de proximidad."],
+                correct: 1
+            },
+            {
+                q: "El término 'On-Premises' se refiere a sistemas que están:",
+                options: ["En la nube pública del proveedor.", "En las instalaciones físicas de la propia empresa.", "En dispositivos de Mist Computing únicamente.", "Gestionados por una IA fuerte."],
+                correct: 1
+            },
+            {
+                q: "La IA débil es capaz de:",
+                options: ["Razonar sobre cualquier problema humano.", "Realizar una tarea específica como un asistente de voz.", "Aprender sin datos previos de forma autónoma.", "Sustituir toda la infraestructura TO."],
+                correct: 1
+            },
+            {
+                q: "La 'Eficiencia' en la unión TI-TO permite:",
+                options: ["Aumentar los costes de mantenimiento.", "Tomar decisiones más rápidas y crear modelos de negocio competitivos.", "Separar los departamentos de IT y producción.", "Ignorar la analítica avanzada."],
+                correct: 1
+            },
+            {
+                q: "¿Qué elemento de TO captura la información del mundo físico?",
+                options: ["Dashboards.", "Servidores virtuales.", "Sensores.", "Herramientas colaborativas."],
+                correct: 2
+            },
+            {
+                q: "El procesamiento cerca de la fuente de datos (pero no necesariamente dentro del dispositivo) es:",
+                options: ["Edge Computing.", "Mist Computing.", "Cloud Computing.", "TI tradicional."],
+                correct: 0
+            }
+        ];
+
+        let score = 0;
+        const wrapper = document.getElementById('questions-wrapper');
+
+        function renderQuiz() {
+            questions.forEach((q, idx) => {
+                const card = document.createElement('div');
+                card.className = 'question-card';
+                card.innerHTML = `
+                    <div class="question-text">${idx + 1}. ${q.q}</div>
+                    <div class="options-grid" id="q${idx}">
+                        ${q.options.map((opt, oIdx) => `
+                            <button class="option-btn" onclick="checkAnswer(${idx}, ${oIdx})">${opt}</button>
+                        `).join('')}
+                    </div>
+                `;
+                wrapper.appendChild(card);
+            });
+        }
+
+        window.checkAnswer = function(qIdx, oIdx) {
+            const container = document.getElementById(`q${qIdx}`);
+            const buttons = container.querySelectorAll('.option-btn');
+            const correctIdx = questions[qIdx].correct;
+
+            if (oIdx === correctIdx) {
+                buttons[oIdx].classList.add('correct');
+                score++;
+            } else {
+                buttons[oIdx].classList.add('incorrect');
+                buttons[correctIdx].classList.add('correct');
+            }
+
+            buttons.forEach(btn => btn.disabled = true);
+        };
+
+        document.getElementById('submit-test').onclick = function() {
+            document.getElementById('quiz-container').classList.add('hidden');
+            const resultsScreen = document.getElementById('results-screen');
+            resultsScreen.style.display = 'block';
+
+            const scoreCircle = document.getElementById('score-circle');
+            const percent = (score / questions.length) * 100;
+            
+            scoreCircle.innerText = `${score}/${questions.length}`;
+            
+            if (percent >= 70) {
+                scoreCircle.style.borderColor = 'var(--success)';
+                document.getElementById('result-quote').innerText = "System.out.println('Tu código compila a la primera. Eres un arquitecto de la digitalización.');";
+            } else {
+                scoreCircle.style.borderColor = 'var(--error)';
+                document.getElementById('result-quote').innerText = "Error 403: Acceso denegado a la excelencia. Necesitas más horas de despliegue en el servidor.";
+            }
+            
+            window.scrollTo(0, 0);
+        };
+
+        renderQuiz();
+    </script>
+</body>
+</html>
