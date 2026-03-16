@@ -26,15 +26,20 @@
             align-items: center;
         }
 
-        .header-img {
-            width: 300px;
-            height: auto;
-            border-radius: 8px;
+         /* Estilos de la imagen del Gato */
+        .img-container {
+            text-align: center;
             margin-bottom: 20px;
-            display: block;
-            margin-left: auto;
-            margin-right: auto;
         }
+        .img-container img {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            border: 4px solid var(--accent);
+            box-shadow: 0 0 20px rgba(233, 69, 96, 0.6);
+            object-fit: cover;
+        }
+
 
         #quiz-container {
             max-width: 800px;
@@ -144,7 +149,11 @@
 </head>
 <body>
 
-   <img src="HACKCAT.jpg" alt="HackCat Logo" class="header-img">
+   <div class="container">
+    <div class="img-container">
+        <img src="HACKCAT.jpg" alt="HACKCAT">
+    </div>
+
 
     <div id="quiz-container">
         <h1>Test: Digitalización P. Desarrollo</h1>
